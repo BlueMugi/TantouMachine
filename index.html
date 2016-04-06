@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>短答マシン</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="css/main.css" />
+        <script src="js/jquery.min.js"></script>
+        <script>
+            var quizid=1;
+            var answer="0";
+            var result="0";
+            var count="31";
+            var timerID; 
+    
+    window.onload = function(){ 
+                   $(".result0").show(); 
+                   $(".result1").hide(); 
+         	   $(".result2").show(); 
+         	   $(".result3").hide();  
+                   sound00.load();
+    }
+
+    function GetQuiz(){
+        //もろもろ初期化
+               $(".result0").show(); 
+               $(".result1").hide(); 
+               $(".result2").show(); 
+               $(".result3").hide();  
+                document.getElementsByName("ansradio")[0].checked = true;        
+                countstop();
+                sound00.currentTime = 0; sound00.pause(); 
+                $(".btn1").prop("disabled", false);
+        //ajaxでphp経由でDB叩く
+	            $.ajax({
+	               url: "./quizget.php",
+	               type: "POST",
+                       data: { "quizid": quizid }, 
+	               success: function(arr){	 
+                       
+                       //戻り値
+                        var parseAr = JSON.parse( arr );
+                        var law=parseAr.law;
+                        var chapter=parseAr.chapter;
+                        var num=parseAr.num;  
+                        var branch=parseAr.branch;  
+                        var read=parseAr.read;  
+                        var quiz=parseAr.quiz;     
+                        answer=parseAr.answer;  
+                          
+                        $(".branch").text(branch);   
+                        $(".mondai").text(read);   
+                        $(".question").text(quiz);      
+                        sound00.play();
+
+                        timerID = setInterval('countdown()',1000); 
+                        countdown();
+
+                        quizid++;
+	               }
+	            });
+	         }
+   
+       function countdown() {
+            count--;
+             $(".timer").text(count); 
+             if (count<11 ){sound01.play();}
+             if (count < 1) countstop();
+    }        
+
+    function countstop() {
+            clearInterval(timerID);
+            count=31;
+    }
+
+     function PostAnswer(){
+                   sound00.currentTime = 0; sound00.pause()
+                   var kekka=0;//当たりハズレ
+                   clearInterval(timerID);
+                   
+                   //ボタン無効化して連打防ぐ
+                   $(".btn1").prop("disabled", true);
+                   
+                   var inputans = $(':radio[name="ansradio"]:checked').val();  
+                   //alert(inputans+answer);
+                   if(inputans==="unknown"){
+                        
+                        kekka=0;
+                        sound04.play();
+                        
+                   }else if((answer==0&&inputans=="false")||(answer==1&&inputans=="true")){
+                     //alert(inputans+answer+"一致");
+        
+                       $(".result0").hide(); 
+                       $(".result1").show(); 
+                       $(".result2").show(); 
+                       $(".result3").hide(); 
+                       kekka=1;
+                       sound02.play();
+                   
+                   }else{
+                     //alert(inputans+answer+"不一致")
+
+                       $(".result0").show(); 
+                       $(".result1").hide(); 
+                       $(".result2").hide(); 
+                       $(".result3").show(); 
+                       kekka=0;
+                       sound03.play();
+                   }
+                  
+                   var data1 = {"quizid": quizid, "result": kekka , "comment": $(':text[name="anscomment"]').val(),"kasegi":count};
+                   
+                    $.ajax({
+	               url: "./answerpost.php",
+	               type: "POST",
+                       data: data1,
+                       
+	               success: function(arr){	 
+                       
+                        //alert($(':text[name="anscomment"]').val());
+	               }
+	            });         
+     }       
+
+         </script>
+        
+        
+    </head>
+    <body>
+        <header>      </header>
+        <div class="timer"></div>  
+        <div class="branch"></div>    
+        <div class="mondai"></div>
+        <div class="question"></div>
+        <div class="resultbox">
+        <div class="result0">Correct</div>
+        <div class="result1">Correct</div> 
+        <div class="result2">Incorrect</div>       
+        <div class="result3">Incorrect</div>
+</div>
+        <div class="ans">
+        <input type="radio" name="ansradio" value="unknown" checked>？
+        <input type="radio" name="ansradio" value="true">○
+        <input type="radio" name="ansradio" value="false">×      
+        <input type="text" name="anscomment" value="" placeholder="コメント">
+        <input type="button" class="btn1" value=" " onclick="PostAnswer();" />
+        </div>
+        <input type="button" class="btn2" value="" onclick="GetQuiz();" />
+    
+<!--以下サウンド-->
+        <audio id="sound00" src="sound/quiz_bgm.mp3"></audio>
+        <audio id="sound01" src="sound/alarm.mp3"></audio>
+        <audio id="sound02" src="sound/ok.mp3"></audio>
+        <audio id="sound03" src="sound/ng.mp3"></audio>
+        <audio id="sound04" src="sound/unknown.mp3"></audio>
+            <script>        
+            var sound00 = document.getElementById('sound00');
+            var sound01 = document.getElementById('sound01');
+            var sound02 = document.getElementById('sound02');
+            var sound03 = document.getElementById('sound03');
+            var sound04 = document.getElementById('sound04');
+            </script>
+<!--ここまでサウンド-->
+    </body>
+    
+</html>
