@@ -18,6 +18,7 @@
                 $result=mysql_query('INSERT INTO tantou.kaitou (quizid, result, comment, kasegi, ansday) VALUES ('.$quizid.', '.$result.', "'.$text.'",'.$kasegi.','.$timestamp.');');
                 
                 if (!$result) {die('クエリエラ～'.mysql_error());}
+
                 //DBとじる
                 $close_flag = mysql_close($link);        
 ?>
