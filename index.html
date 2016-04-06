@@ -23,7 +23,7 @@
     }
     
     function GetPage(){
-        //最新ページを取得
+        //ロードしたときに最新ページを取得
        	            $.ajax({
 	               url: "./pageget.php",
 	               type: "GET",
@@ -46,6 +46,7 @@
                 countstop();
                 sound00.currentTime = 0; sound00.pause(); 
                 $(".btn1").prop("disabled", false);
+                $(':text[name="anscomment"]').val("");
         //ajaxでphp経由でDB叩く
 	            $.ajax({
 	               url: "./quizget.php",
