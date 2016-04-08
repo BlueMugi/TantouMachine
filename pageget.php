@@ -1,5 +1,5 @@
 <?php
- $link = mysql_connect('localhost', 'root', 'nekodama1919');
+ $link = mysql_connect('localhost', 'root', 'password');
                 mysql_query('SET NAMES utf8', $link ); //文字化け防止
                 if (!$link) {die('接続失敗です。'.mysql_error());}   
                 
