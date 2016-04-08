@@ -7,9 +7,10 @@
         <script src="js/jquery.min.js"></script>
         <script>
             var quizid=1;
+            var branch="";//枝番
             var answer="0";
             var result="0";
-            var count="31";
+            var count=0;
             var timerID; 
     
     window.onload = function(){ 
@@ -23,16 +24,16 @@
     }
     
     function GetPage(){
-        //ロードしたときに最新ページを取得
-       	            $.ajax({
+        //DB内の最大値を取得
+        $.ajax({
 	               url: "./pageget.php",
 	               type: "GET",
-	               success: function(page){	                      
+	               success: function(page){
                        //戻り値
                         page=parseInt(page);
                         quizid=page+1;
 	               }
-	            });             
+	            });     
     }
     
 
@@ -60,11 +61,15 @@
                         var law=parseAr.law;
                         var chapter=parseAr.chapter;
                         var num=parseAr.num;  
-                        var branch=parseAr.branch;  
+                        branch=parseAr.branch;  
                         var read=parseAr.read;  
                         var quiz=parseAr.quiz;     
                         answer=parseAr.answer;  
-                          
+                        
+                        var percent = quizid/2910*100;
+                        var sinkou = floatFormat( percent, 2 )
+                        
+                        $(".quizid").text(quizid+"/2910("+sinkou+"%)");   
                         $(".branch").text(branch);   
                         $(".mondai").text(read);   
                         $(".question").text(quiz);      
@@ -73,7 +78,7 @@
                         timerID = setInterval('countdown()',1000); 
                         countdown();
 
-                        quizid++;
+                        
 	               }
 	            });
 	         }
@@ -89,6 +94,11 @@
             clearInterval(timerID);
             count=31;
     }
+    
+    function floatFormat( number, n ) {
+	var _pow = Math.pow( 10 , n ) ;
+	return Math.round( number * _pow ) / _pow ;
+}
 
      function PostAnswer(){
                    sound00.currentTime = 0; sound00.pause()
@@ -98,6 +108,7 @@
                    //ボタン無効化して連打防ぐ
                    $(".btn1").prop("disabled", true);
                    
+                   //正誤判定
                    var inputans = $(':radio[name="ansradio"]:checked').val();  
                    //alert(inputans+answer);
                    if(inputans==="unknown"){
@@ -126,7 +137,16 @@
                        sound03.play();
                    }
                   
-                   var data1 = {"quizid": quizid, "result": kekka , "comment": $(':text[name="anscomment"]').val(),"kasegi":count};
+                  //残り時間
+                  var kasegi=0;
+                  if (count==31){
+                      kasegi=0;
+                  }else{
+                      kasegi=count
+                  }
+                  
+                  
+                   var data1 = {"quizid": quizid, "branch": branch,"result": kekka , "comment": $(':text[name="anscomment"]').val(),"kasegi":kasegi};
                    
                     $.ajax({
 	               url: "./answerpost.php",
@@ -137,7 +157,11 @@
                        
                         //alert($(':text[name="anscomment"]').val());
 	               }
-	            });         
+	            });   
+                    
+                    //インクリメントは最後!!
+                    quizid++;
+                    
      }       
 
          </script>
@@ -145,7 +169,9 @@
         
     </head>
     <body>
-        <header>      </header>
+        <header>      
+                <span class="quizid">0000/2910(0%) </span>
+        </header>
         <div class="timer"></div>  
         <div class="branch"></div>    
         <div class="mondai"></div>
