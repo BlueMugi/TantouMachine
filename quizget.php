@@ -1,7 +1,7 @@
         <?php
         ini_set( 'display_errors', 1 );
         //DB接続
-        $link = mysql_connect('localhost', 'root', 'nekodama1919');
+        $link = mysql_connect('localhost', 'root', 'password');
                 mysql_query('SET NAMES utf8', $link ); //文字化け防止
                 if (!$link) {die('接続失敗です。'.mysql_error());}   
                 
